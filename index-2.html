@@ -14,10 +14,10 @@
         function FriendsList(props) {
             return (
                 <ul>
-                    {props.list.map((name) => (
-                        <li key={name}>
-                            <span>{name}</span>
-                            &nbsp;<button onClick={() => props.onRemoveFriend(name)}>X</button>
+                    {props.list.map((friend) => (
+                        <li key={friend.name}>
+                            <span>{friend.name}</span>
+                            &nbsp;<button onClick={() => props.onRemoveFriend(friend.name)}>X</button>
                         </li>
                     ))}
                 </ul>
@@ -29,7 +29,11 @@
                 super(props);
 
                 this.state = {
-                    friends: ['Jordyn', 'Mikenzi', 'Jake'],
+                    friends: [
+                        { name: 'Jordyn', active: true },
+                        { name: 'Mikenzi', active: true },
+                        { name: 'Jake', active: false }
+                    ],
                     input: ''
                 };
 
@@ -41,7 +45,10 @@
             handleAddFriend() {
                 this.setState((currentState) => {
                     return {
-                        friends: currentState.friends.concat([currentState.input]),
+                        friends: currentState.friends.concat([{
+                                name: currentState.input,
+                                active: true
+                            }]),
                         input: ''
                     }
                 });
@@ -50,7 +57,7 @@
             handleRemoveFriend(name) {
                 this.setState((currentState) => {
                     return {
-                        friends: currentState.friends.filter((friend) => friend !== name)
+                        friends: currentState.friends.filter((friend) => friend.name !== name)
                     }
                 });
             }
@@ -72,8 +79,11 @@
                             value={this.state.input}
                             onChange={this.updateInput}
                         />
-
                         <button onClick={this.handleAddFriend}>Submit</button>
+
+                        <div>
+                            <button>Clear All</button>
+                        </div>
 
                         <FriendsList
                             list={this.state.friends}
