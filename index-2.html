@@ -56,26 +56,6 @@
             );
         }
 
-        function FriendsList(props) {
-            return (
-                <div>
-                    <h1>{props.active ? 'Active' : 'Inactive'} Friends</h1>
-
-                    <ul>
-                        {props.list.map((friend) => (
-                            <li key={friend.name}>
-                                <span>{friend.name}</span>
-                                <button
-                                    style={{display: 'inline-block', margin: '2px 5px'}}
-                                    onClick={() => props.onRemoveFriend(friend.name)}>Remove
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            );
-        }
-
         class App extends React.Component {
             constructor(props) {
                 super(props);
@@ -93,6 +73,7 @@
                 this.updateInput = this.updateInput.bind(this);
                 this.handleAddFriend = this.handleAddFriend.bind(this);
                 this.handleToggleFriend = this.handleToggleFriend.bind(this);
+                this.keyPressInput = this.keyPressInput.bind(this);
             }
 
             handleAddFriend() {
@@ -138,6 +119,12 @@
                 });
             }
 
+            keyPressInput(e) {
+                if (e.charCode === 13) {
+                    this.handleAddFriend();
+                }
+            }
+
             render() {
                 return (
                     <div>
@@ -146,9 +133,12 @@
                             placeholder="new friend"
                             value={this.state.input}
                             onChange={this.updateInput}
+                            onKeyPress={this.keyPressInput}
                         />
 
-                        <button onClick={this.handleAddFriend}>Submit</button>
+                        <button onClick={this.handleAddFriend}>
+                            Submit
+                        </button>
 
                         <div>
                             <button onClick={() => this.setState({friends: []})}>
