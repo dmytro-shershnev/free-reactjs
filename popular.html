@@ -44,13 +44,10 @@
                     ? this.setState(() => ({ text: 'Loading' }))
                     : this.setState((prevState) => ({ text: prevState.text + '.' }))
             }, 300);
-
-            console.log('TIMER');
         }
 
         componentWillUnmount() {
             clearInterval(this.interval);
-            console.log('componentWillUnmount');
         }
 
         render() {
@@ -62,51 +59,97 @@
         }
     }
 
-    const List = (props) => {
+    function Nav(props) {
+        const languages = ['all', 'javascript', 'ruby', 'python'];
+
         return (
-            <ul>
-                {props.languages.map((item) => (
-                    <li key={item.name}>{item.title}</li>
+            <nav>
+                <ul>
+                    {languages.map((lang) => (
+                        <li key={lang} onClick={() => props.onSelectLanguage(lang)}>
+                            {lang}
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+        );
+    }
+
+    function RepoGrid(props) {
+        return (
+            <ul style={{display: 'flex', flexWrap: 'wrap'}}>
+                {props.repos.map(({name, owner, stargazers_count, html_url}) => (
+                    <li key={name} style={{margin: 30}}>
+                        <ul>
+                            <li><a href={html_url}>{name}</a></li>
+                            <li>@{owner.login}</li>
+                            <li>{stargazers_count}</li>
+                        </ul>
+                    </li>
                 ))}
             </ul>
         );
-    };
+    }
 
     class App extends React.Component {
         constructor(props) {
             super(props);
 
             this.state = {
-                languages: [
-                    {
-                        title: 'All',
-                        name: 'all'
-                    },
-                    {
-                        title: 'JavaScript',
-                        name: 'javascript'
-                    },
-                    {
-                        title: 'Ruby',
-                        name: 'ruby'
-                    },
-                    {
-                        title: 'Python',
-                        name: 'python'
-                    }
-                ],
+                repos: [],
+                activeLanguage: 'all',
                 loading: true
             };
+
+            this.handleSelectLanguage = this.handleSelectLanguage.bind(this);
+            this.fetchRepos = this.fetchRepos.bind(this);
+        }
+
+        fetchRepos(lang) {
+            this.setState({
+                loading: true
+            });
+
+            window.API.fetchPopularRepos(lang)
+                .then((repos) => {
+                   this.setState({
+                       loading: false,
+                       repos
+                   })
+                });
+        }
+
+        handleSelectLanguage(lang) {
+            this.setState({
+                activeLanguage: lang
+            });
+        }
+
+        componentDidMount() {
+            this.fetchRepos(this.state.activeLanguage)
+        }
+
+        componentDidUpdate (prevProps, prevState) {
+            if (prevState.activeLanguage !== this.state.activeLanguage) {
+                this.fetchRepos(this.state.activeLanguage)
+            }
         }
 
         render() {
-            if (this.state.loading) {
-                return <Loading />;
-            }
-
             return (
                 <div>
-                    <List languages={this.state.languages} />
+                    <Nav onSelectLanguage={this.handleSelectLanguage}/>
+                    {this.state.loading
+                        ? <Loading />
+                        :
+                        <div>
+                            <h1 style={{textAlign: 'center'}}>
+                                {this.state.activeLanguage}
+                            </h1>
+
+                            <RepoGrid repos={this.state.repos} />
+                        </div>
+                    }
                 </div>
             )
         }
